@@ -1,0 +1,82 @@
+Num samples: 61
+Num observations: 7434
+Total count: 886970
+Table density (fraction of non-zero values): 0.128
+Table md5 (unzipped): 573ca4652d0bfcfaf0ab1f12fc65446a
+
+Counts/sample summary:
+ Min: 5166.0
+ Max: 25704.0
+ Median: 14506.000
+ Mean: 14540.492
+ Std. dev.: 4826.377
+ Sample Metadata Categories: None provided
+ Observation Metadata Categories: taxonomy
+
+Counts/sample detail:
+ Swab.162.7: 5166.0
+ Swab.162.27: 6783.0
+ Swab.162.26: 6790.0
+ Swab.162.2: 7250.0
+ Swab.162.6: 7396.0
+ Swab.162.31: 7560.0
+ Swab.162.1: 8041.0
+ Swab.162.3: 8087.0
+ Swab.162.5: 8276.0
+ Swab.162.22: 8975.0
+ Swab.162.8: 9581.0
+ Swab.162.25: 9784.0
+ Swab.162.4: 9859.0
+ Swab.162.29: 10027.0
+ Swab.162.35: 10669.0
+ Swab.162.23: 10670.0
+ Swab.162.38: 11054.0
+ Swab.162.30: 11105.0
+ Swab.162.19: 11739.0
+ Swab.162.28: 11862.0
+ Swab.162.51: 11887.0
+ Swab.162.32: 12739.0
+ Swab.162.42: 13006.0
+ Swab.162.58: 13031.0
+ Swab.162.36: 13229.0
+ Swab.162.34: 13409.0
+ Swab.162.21: 13823.0
+ Swab.162.41: 14410.0
+ Swab.162.10: 14441.0
+ Swab.162.33: 14456.0
+ Swab.162.18: 14506.0
+ Swab.162.17: 14620.0
+ Swab.162.40: 14933.0
+ Swab.162.9: 15100.0
+ Swab.162.44: 15422.0
+ Swab.162.59: 15918.0
+ Swab.162.45: 15939.0
+ Swab.162.57: 16369.0
+ Swab.162.49: 16370.0
+ Swab.162.20: 16510.0
+ Swab.162.14: 16649.0
+ Swab.162.24: 16753.0
+ Swab.162.43: 16997.0
+ Swab.162.37: 17097.0
+ Swab.162.46: 17353.0
+ Swab.162.15: 18089.0
+ Swab.162.39: 18164.0
+ Swab.162.50: 18427.0
+ Swab.162.13: 19136.0
+ Swab.162.12: 19284.0
+ Swab.162.55: 19322.0
+ Swab.162.47: 19535.0
+ Swab.162.61: 19555.0
+ Swab.162.56: 20642.0
+ Swab.162.48: 20987.0
+ Swab.162.54: 21003.0
+ Swab.162.11: 21915.0
+ Swab.162.60: 22184.0
+ Swab.162.52: 23191.0
+ Swab.162.53: 24191.0
+ Swab.162.16: 25704.0
+
+-----------------------------
+
+this many sequences were in the original "seq.fna" file:
+968785

@@ -1,0 +1,36 @@
+Num samples: 15
+Num observations: 2304
+Total count: 7041
+Table density (fraction of non-zero values): 0.112
+Table md5 (unzipped): 12c71ce49d0b115bc2c0315361dfe98f
+
+Counts/sample summary:
+ Min: 46.0
+ Max: 2641.0
+ Median: 227.000
+ Mean: 469.400
+ Std. dev.: 644.133
+ Sample Metadata Categories: None provided
+ Observation Metadata Categories: taxonomy
+
+Counts/sample detail:
+ Floordust2: 46.0
+ Indoorair4: 106.0
+ HVACduct3: 109.0
+ Floordust1: 128.0
+ Indoorair3: 152.0
+ Indoorair2: 156.0
+ HVACdust3: 184.0
+ HVACdust2: 227.0
+ HVACduct2: 267.0
+ HVACduct1: 271.0
+ HVACduct4: 314.0
+ HVACdust1: 498.0
+ Indoorair5: 937.0
+ Indoorair1: 1005.0
+ Floordust4: 2641.0
+
+-----------------------------
+
+this many sequences were in the original "seq.fna" file:
+12613

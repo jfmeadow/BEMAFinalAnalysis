@@ -1,0 +1,51 @@
+Num samples: 30
+Num observations: 2521
+Total count: 225511
+Table density (fraction of non-zero values): 0.100
+Table md5 (unzipped): 710425c8525d0c766aa5fe83f1b7d875
+
+Counts/sample summary:
+ Min: 157.0
+ Max: 24269.0
+ Median: 5270.000
+ Mean: 7517.033
+ Std. dev.: 6157.433
+ Sample Metadata Categories: None provided
+ Observation Metadata Categories: taxonomy
+
+Counts/sample detail:
+ MIR11.660750: 157.0
+ MSO9.660758: 554.0
+ MIK12.660773: 1224.0
+ MBP17.660767: 1594.0
+ MBR13.660762: 1603.0
+ MSS1.660763: 2506.0
+ MII5.660766: 2789.0
+ MBP4.660768: 3262.0
+ MPK2.660771: 3274.0
+ MWR16.660756: 3603.0
+ MDB6.660747: 3812.0
+ UDB19.660770: 4421.0
+ MIW3.660761: 4463.0
+ MSC8.660757: 4657.0
+ MDB7.660769: 5038.0
+ MWR15.660764: 5502.0
+ MBD10.660775: 5635.0
+ UPK18.660765: 7014.0
+ UIW23.660774: 7332.0
+ UDB31.660751: 8932.0
+ MBT14.660752: 9200.0
+ UWR20.660776: 9431.0
+ UIK27.660759: 11001.0
+ UWR21.660749: 11509.0
+ UBD22.660753: 12693.0
+ UIR24.660760: 12939.0
+ UBT30.660772: 18841.0
+ USO26.660754: 18896.0
+ UII29.660748: 19360.0
+ UBR25.660755: 24269.0
+
+-----------------------------
+
+this many sequences were in the original "seq.fna" file:
+236619

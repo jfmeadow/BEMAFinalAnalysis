@@ -1,0 +1,80 @@
+Num samples: 59
+Num observations: 1630
+Total count: 23607
+Table density (fraction of non-zero values): 0.056
+Table md5 (unzipped): d0a828911e367853dc482490f7523a1c
+
+Counts/sample summary:
+ Min: 19.0
+ Max: 1683.0
+ Median: 318.000
+ Mean: 400.119
+ Std. dev.: 321.666
+ Sample Metadata Categories: None provided
+ Observation Metadata Categories: taxonomy
+
+Counts/sample detail:
+ Summer.Negative.neg.ext.1: 19.0
+ Winter.8.Bath: 141.0
+ Summer.8.Balcony: 150.0
+ Summer.7.K: 166.0
+ Summer.11.Balcony: 171.0
+ Summer.9.Bath: 174.0
+ Summer.10.LR: 177.0
+ Summer.9.K: 180.0
+ Summer.7.LR: 201.0
+ Winter.4.Kitchen: 208.0
+ Summer.4.Balcony: 210.0
+ Winter.4.Bath: 210.0
+ Winter.11.Bath: 216.0
+ Winter.3.LR: 216.0
+ Summer.7.Balcony: 217.0
+ Winter.3.Bath: 230.0
+ Winter.5.LR: 236.0
+ Winter.5.Bath: 237.0
+ Winter.3.Bedroom: 240.0
+ Summer.8.LR: 250.0
+ Summer.5.LR: 265.0
+ Winter.10.Bedroom: 272.0
+ Winter.5.Kitchen: 273.0
+ Winter.3.Kitchen: 285.0
+ Summer.4.Bath: 286.0
+ Summer.3.Bedroom: 299.0
+ Summer.10.K: 300.0
+ Winter.5.Bedroom: 301.0
+ Summer.7.Bath: 301.0
+ Summer.1.LR: 318.0
+ Summer.5.Bath: 321.0
+ Summer.8.K: 325.0
+ Winter.2.Bath: 331.0
+ Summer.5.Balcony: 357.0
+ Summer.4.Bedroom: 364.0
+ Summer.9.Balcony: 369.0
+ Summer.6.Balcony: 373.0
+ Summer.2.Bath: 374.0
+ Summer.1.Bedroom: 379.0
+ Summer.6.Bath: 385.0
+ Winter.2.Kitchen: 387.0
+ Summer.3.Balcony: 393.0
+ Summer.5.Bedroom: 417.0
+ Summer.6.K: 421.0
+ Winter.4.Bedroom: 425.0
+ Summer.2.Balcony: 426.0
+ Summer.1.Balcony: 427.0
+ Summer.6.Bedroom: 435.0
+ Summer.8.Bedroom: 439.0
+ Winter.8.Bedroom: 439.0
+ Winter.2.Bedroom: 485.0
+ Winter.7.LR: 505.0
+ Winter.2.LR: 531.0
+ Winter.7.Kitchen: 697.0
+ Winter.8.Balcony: 1063.0
+ Winter.5.Balcony: 1298.0
+ Winter.2.Balcony: 1350.0
+ Winter.10.Balcony: 1459.0
+ Winter.4.Balcony: 1683.0
+
+-----------------------------
+
+this many sequences were in the original "seq.fna" file:
+41235

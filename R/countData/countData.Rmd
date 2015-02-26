@@ -1,0 +1,852 @@
+---
+output:
+  html_document:
+    keep_md: true
+  pdf_document:
+    highlight: tango
+    toc: yes
+---
+
+```{r config, echo=FALSE}
+library(knitr)
+opts_chunk$set(background='gray80', tidy=FALSE, comment='', 
+               cache=FALSE, keep_md=TRUE, 
+               fig.path='figure/', fig.width=7, fig.height=7)
+```
+
+
+
+
+
+# BEMA analysis of sequencing depth
+
+
+```{r loadPackages, }
+library(wesanderson)
+library(scales)
+library(nlme)
+```
+
+
+
+
+```{r importData}
+# setwd('~/Dropbox/BEMA/bacteriaHTS/closed_ref_pickedOTUs/BEMAFinalAnalysis/R/countData')
+
+## lots of summary stats accumulated with python scripts. 
+counts <- read.delim('../../Avg_assigned_seqs_files/harvestStats/summaryStatsAll.txt', 
+                     sep='\t', head=TRUE, skip=1)
+aves <- read.delim('aveSeqs.txt', sep='\t', head=TRUE)
+
+## Mapping table of all studies.
+map <- read.delim('../../mergedMap.txt', sep='\t', head=TRUE)
+names(map)[1] <- gsub('X.', '', names(map)[1])
+
+## diverersity analysis that was used for exploration but not in the final manuscript
+hrj <- read.delim('../BEMAHRJ.txt', sep='\t', head=TRUE)
+alphaDiv <- read.delim('../alphaDiversity.txt', head=TRUE, row.names=1)
+
+## Source tracker results from separate script. 
+load('../SourceTrackerResults2015.RData')
+sT.full <- results$proportions
+```
+
+
+Check some inputs. 
+
+```{r summarizeMapAndCounts, eval=FALSE}
+head(map)
+str(map)
+head(counts)
+str(counts)
+head(hrj)
+str(hrj)
+dim(map); dim(counts); dim(hrj)
+```
+
+
+Jive datasets by row.names. 
+
+
+```{r jiveMapAndCountsAndHRJ}
+row.names(counts) <- counts$sampleName
+row.names(map) <- map$SampleID
+namesToKeep.tmp <- intersect(row.names(counts), row.names(map))
+namesToKeep <- intersect(namesToKeep.tmp, row.names(hrj))
+dat <- data.frame(counts[namesToKeep, ], map[namesToKeep, ], hrj[namesToKeep, ])
+# head(dat)
+```
+
+
+
+After checking, most of these samples are from larger studies that dropped out of the OTU tables because of no reads, so they can just be taken out of further analysis. 
+
+
+
+---------
+
+This sets up a few contrasting colors. Humans are terrible at differentiating more than about 15 colors, and we need 23 at times. So here is a set of 23 unique colors that hopefully contrast well enough. This package (`wesanderson`) was written by Karthik Ram ([https://github.com/karthik/wesanderson.git](https://github.com/karthik/wesanderson)). 
+
+```{r setupColors}
+
+pal <- c(
+  wes_palette('GrandBudapest', 4),
+  wes_palette('GrandBudapest2', 4),
+  wes_palette('Moonrise2', 4),
+  wes_palette('Royal1', 4),
+  wes_palette('Zissou', 2),
+  wes_palette('Cavalcanti', 3), 
+  wes_palette('Rushmore', 5)[4], 
+  wes_palette('Darjeeling', 5)[3])
+
+
+plot(1:length(pal), rep(0, length(pal)), pch=15, cex=3, col=pal)
+
+# pal <- col22
+
+studyLevels <- levels(dat$Description)
+dat$col <- NULL
+for(i in 1:length(studyLevels)) {
+  dat$col[dat$Description == studyLevels[i]] <- pal[i]
+  }
+```
+
+
+Import average sequence length (`aveSeqLength`) from each sequence dataset. This was done with a simple unix shell command that was run on all 22 studies: 
+
+```
+grep '^[GATC].*' seqs.fna | awk '{sum+=length($0)}END{print sum/NR}'
+``` 
+
+
+```{r aveSeqs}
+dat$aveSeqLength <- 0
+# aves
+for(i in 1:nrow(aves)) {
+  dat$aveSeqLength[dat$Description == aves$StudyName[i]] <- aves$avgSeqLength[i]
+}
+```
+
+Plots of: 
+
+* Number of sequences assigned with barcodes (passed quality filtering) ~ the percent per sample in final OTU table. This is assessment of quality sequences that mapped to GreenGenes database. 
+* Similar but ~ number of observations in OTU table instead of percent. Interesting to note the slight departure from 1:1 for a couple of studies. 
+
+This exhibits that these metrics are very much biased by each study. Studies tend to cluster, and some are well mixed, but overall, clustered by study. 
+
+```{r plotCounts}
+# par(mar=c(
+plot(dat$splitTotal ~ dat$percentAssigned, pch=16, cex=.4, col=dat$col, 
+     log='y', yaxt='n', 
+     xlab='Percent of sequences assigned to reference database', 
+     ylab='Number of sequences per sample')
+axis(2, at=c(0, 100, 1000, 10000, 100000), 
+     labels=c('0', '100', '1000', '10000', '100000'), las=1)
+legend('bottomleft', legend=unique(dat$Description), col=unique(dat$col), 
+       pch=16, cex=.6, bty='n', pt.cex=1.3)
+```
+
+A few studies float above the line. x-axis = the number of sequences that made it into the OTU table from (y-axis) the number that made it through split library filtering. This might say that these studies are biased such that fewer sequences were assigned with GreenGenes, since we used closed-reference OTU clustering. 
+
+```{r plotCounts2, eval=FALSE}
+plot(dat$splitTotal ~ dat$otuTableTotal, log='xy', pch=16, cex=.2, col=dat$col)
+legend('bottomright', legend=unique(dat$Description), col=unique(dat$col), 
+       pch=16, cex=.6, bty='n', pt.cex=1.3)
+```
+
+
+Shannon-Weiner diversity ~ percent of quality sequences assigned in OTU table. Asking if closed ref biases alpha diversity. Big difference. Think about what this means. Very study dependent, but certainly worth reporting. This plot gets remade with better treatment later. 
+
+```{r plotDiversity}
+plot(dat$H1 ~ I(dat$percentAssigned^4), pch=16, cex=.4, col=dat$col)
+legend('bottomleft', legend=unique(dat$Description), col=unique(dat$col), 
+       pch=16, cex=.6, bty='n', pt.cex=1.3)
+summary(lm(dat$H1 ~ I(dat$percentAssigned^4)))
+```
+
+
+Bring in phylogenetic diversity and Shannon diversity created by QIIME.
+
+```{r PDtoDat}
+all(row.names(dat) %in% row.names(alphaDiv))
+dat$shDiv <- alphaDiv[row.names(dat), 'shannon']
+dat$pd <- alphaDiv[row.names(dat), 'PD_whole_tree']
+```
+
+
+
+
+
+
+```{r buildPlotDiversityErrorCross}
+se <- function(x) {sd(x)/sqrt(length(x))}
+nstudies <- nlevels(dat$Description)
+dat$percentAssigned4 <- dat$percentAssigned^4
+divBars <- data.frame(#matrix(0, nrow=nstudies, ncol=8),
+    meanX=aggregate(dat$percentAssigned4, by=list(dat$Description), FUN='mean')$x,
+    meanY=aggregate(dat$H1, by=list(dat$Description), FUN='mean')$x,
+    seX=aggregate(dat$percentAssigned4, by=list(dat$Description), FUN='se')$x,
+    seY=aggregate(dat$H1, by=list(dat$Description), FUN='se')$x, 
+    sdX=aggregate(dat$percentAssigned4, by=list(dat$Description), FUN='sd')$x,
+    sdY=aggregate(dat$H1, by=list(dat$Description), FUN='sd')$x)
+row.names(divBars) <- levels(dat$Description)
+divBars$seXplus <- divBars$meanX + divBars$sdX
+divBars$seXminus <- divBars$meanX - divBars$sdX
+divBars$seYplus <- divBars$meanY + divBars$sdY
+divBars$seYminus <- divBars$meanY - divBars$sdY
+divBars$sdXplus <- divBars$meanX + divBars$sdX
+divBars$sdXminus <- divBars$meanX - divBars$sdX
+divBars$sdYplus <- divBars$meanY + divBars$sdY
+divBars$sdYminus <- divBars$meanY - divBars$sdY
+divBars$col <- unique(dat$col)
+divCoef <- summary(lm(dat$H1 ~ dat$percentAssigned4))$coefficients
+
+divBars$meanPD <- aggregate(dat$pd, by=list(dat$Description), FUN='mean')$x
+divBars$sePD <- aggregate(dat$pd, by=list(dat$Description), FUN='se')$x
+divBars$sePDplus <- divBars$meanPD + divBars$sePD
+divBars$sePDminus <- divBars$meanPD - divBars$sePD
+divBars$sdPD <- aggregate(dat$pd, by=list(dat$Description), FUN='sd')$x
+divBars$sdPDplus <- divBars$meanPD + divBars$sdPD
+divBars$sdPDminus <- divBars$meanPD - divBars$sdPD
+```
+
+
+```{r buildPerAssignedNO4}
+se <- function(x) {sd(x)/sqrt(length(x))}
+nstudies <- nlevels(dat$Description)
+# dat$percentAssigned4 <- dat$percentAssigned^4
+divBars1 <- data.frame(
+    meanX=aggregate(dat$percentAssigned, by=list(dat$Description), FUN='mean')$x,
+    seX=aggregate(dat$percentAssigned, by=list(dat$Description), FUN='se')$x,
+    sdX=aggregate(dat$percentAssigned, by=list(dat$Description), FUN='sd')$x)
+row.names(divBars1) <- levels(dat$Description)
+divBars1$seXplus <- divBars1$meanX + divBars1$sdX
+divBars1$seXminus <- divBars1$meanX - divBars1$sdX
+divBars1$sdXplus <- divBars1$meanX + divBars1$sdX
+divBars1$sdXminus <- divBars1$meanX - divBars1$sdX
+divBars1$col <- unique(dat$col)
+```
+
+
+```{r}
+par(mfrow=c(nstudies, 1), mar=c(0,0,0,10))
+for(i in 1:nstudies){
+  subDat <- dat$percentAssigned[dat$Description == levels(dat$Description)[i]]
+  plot(0,0, type='n', ann=FALSE, axes=FALSE, 
+       xlim=c(0, max(dat$percentAssigned)), ylim=c(0, 30))
+  polygon(density(dat$percentAssigned[dat$Description == levels(dat$Description)[i]]), col='tomato')
+       }
+```
+
+
+
+
+
+
+See if they correlate: Shannon = yes; PD = quite different. 
+
+```{r checkDiv}
+plot(dat$H1, dat$shDiv)
+plot(dat$H1, dat$pd)
+```
+
+
+```{r plotDiversityErrorCross, eval=FALSE}
+plot(dat$H1 ~ dat$percentAssigned4, type='n', las=1, 
+     ylab='Taxonomic Diversity', )
+arrows(divBars$meanX, divBars$seYplus, divBars$meanX, divBars$seYminus, 
+       code=3, angle=90, length=.1, col='gray50')
+arrows(divBars$seXplus, divBars$meanY, divBars$seXminus, divBars$meanY, 
+       code=3, angle=90, length=.1, col='gray')
+points(divBars$meanX, divBars$meanY, pch=21, bg=divBars$col, cex=2, col='gray30')
+legend('bottomleft', legend=unique(dat$Description), col=unique(dat$col), 
+       pch=16, cex=.6, bty='n', pt.cex=1.3)
+
+```
+
+
+Pick on a couple of studies to see if relationship is study-dependent. Yes. For several studies, the trend is the same, but weak. 
+
+
+```{r BowersplotDiversity, eval=FALSE}
+kit <- which(dat$Description == 'Flores_Residential_Kitchen_Microbiology')
+summary(lm(dat$H1[kit] ~ dat$percentAssigned[kit]))
+plot(dat$H1[kit] ~ dat$percentAssigned[kit], pch=16, cex=.4, col=dat$col[kit])
+legend('bottomleft', legend=unique(dat$Description), col=unique(dat$col), 
+       pch=16, cex=.6, bty='n', pt.cex=1.3)
+```
+
+
+```{r LeffplotDiversity, eval=FALSE}
+leff <- which(dat$Description == 'Leff_forty_homes_HiSeq')
+summary(lm(dat$H1[leff] ~ dat$percentAssigned[leff]))
+plot(dat$H1[leff] ~ dat$percentAssigned[leff], pch=16, cex=.4, col=dat$col[leff])
+legend('bottomleft', legend=unique(dat$Description), col=unique(dat$col), 
+       pch=16, cex=.6, bty='n', pt.cex=1.3)
+```
+
+
+
+Diversity ~ sequence depth per sample. 
+
+```{r plotDiversity2, fig.width=12, eval=FALSE}
+par(mfrow=c(1,1), mar=c(5,4,4,1))
+plot(dat$H1 ~ log(dat$splitTotal), pch=16, cex=.4, col=dat$col, xlim=c(4, 16))
+legend('bottomright', legend=unique(dat$Description), col=unique(dat$col), 
+       pch=16, cex=.6, bty='n', pt.cex=1.3)
+```
+
+
+Diversity decreases with sequence length. This should be checked within environment. 
+
+```{r plotLengthAndDiversity, eval=FALSE}
+plot(dat$H1 ~ dat$aveSeqLength, pch=16, cex=.4, col=dat$col)
+legend('bottomleft', legend=unique(dat$Description), col=unique(dat$col), 
+       pch=16, cex=.6, bty='n', pt.cex=1.3)
+summary(lm(dat$H1 ~ dat$aveSeqLength))
+```
+
+Percent of sequences mapping to GreenGenes ~ average sequening length per study. This is likely confounded by environment and study. 
+
+```{r percentAndSeqLength, fig.width=12, eval=FALSE}
+plot(dat$percentAssigned ~ dat$aveSeqLength, pch=16, cex=.4, col=dat$col, 
+     xlim=c(0, 530))
+legend('bottomleft', legend=unique(dat$Description), col=unique(dat$col), 
+       pch=16, cex=.6, bty='n', pt.cex=1.3)
+summary(lm(dat$percentAssigned ~ dat$aveSeqLength))
+```
+
+
+
+
+
+```{r, eval=FALSE}
+plot(dat$percentAssigned ~ dat$aveSeqLength, pch=16, cex=.4, col=dat$col)
+legend('bottomleft', legend=unique(dat$Description), col=unique(dat$col), 
+       pch=16, cex=.6, bty='n', pt.cex=1.3)
+```
+
+
+
+
+
+
+
+
+```{r plotDiversityErrorCrossPoints, fig.width=12, eval=FALSE}
+# pdf('~/Desktop/divPercent.pdf', width=9, height=7)
+layout(matrix(c(1, 2), 1, 2), widths=3, 1)
+par(mar=c(4, 4, 1, 0))
+plot(dat$H1 ~ dat$percentAssigned4, las=1, pch=16, cex=.6, 
+     col=alpha(dat$col, alpha=0.7), #col=rgb(0,0,0,.2),
+     ylab='Shannon-Wiener Taxonomic Diversity', 
+     xlab=expression((Percent~of~sequences~assigned~to~GreenGenes)^{4}))
+curve(divCoef[1] + x*divCoef[2], add=TRUE, col='darkorange', lwd=2)
+arrows(divBars$meanX, divBars$sdYplus, divBars$meanX, divBars$sdYminus, 
+       code=3, angle=90, length=.1, col='gray20')
+arrows(divBars$sdXplus, divBars$meanY, divBars$sdXminus, divBars$meanY, 
+       code=3, angle=90, length=.1, col='gray20')
+points(divBars$meanX, divBars$meanY, pch=21, bg=divBars$col, cex=2, col='gray20')
+par(mar=c(4, 0, 1, 0))
+plot(1,1, ann=FALSE, axes=FALSE, bty='n', type='n')
+legend('bottomleft', legend=unique(dat$Description), pt.bg=unique(dat$col), 
+       col='gray20', pch=21, cex=.6, bty='n', pt.cex=1.4, y.intersp=1.2)
+# dev.off()
+```
+
+
+
+
+
+```{r makeDivOrdered}
+divOrdered <- divBars[rev(order(divBars$meanX)), ]
+divOrdered1 <- divBars1[rev(order(divBars1$meanX)), ]
+```
+
+
+
+
+
+
+```{r orderedDivPlot, eval=FALSE}
+plotdf <- divOrdered
+y <- 1:nrow(plotdf)
+x.lim <- c(0, 1) #range(plotdf[, c('seXminus', 'seXplus')])
+par(las=1, mar=c(4, 15, 1, 1))
+plot(plotdf$meanX, y, type='n', xlim=x.lim, 
+     ann=FALSE, xaxt='n', yaxt='n', xaxs='i')
+abline(h=y, col='gray90', lty=3)
+par(xpd=TRUE)
+arrows(plotdf$seXminus, y,
+       plotdf$seXplus, y,
+       col='gray40', code=3, length=.03, angle=90)
+par(xpd=FALSE)
+points(plotdf$meanX, y, cex=2,
+       pch=21, bg=plotdf$col, col='gray30')
+mtext(row.names(plotdf), at=y, side=2, line=0.5, cex=.9)
+axis(1)
+mtext('Proportion of sequences assigned\nin GreenGenes Database', 
+      side=1, at=.5, line=3)
+```
+
+
+
+```{r plotPD,eval=FALSE}
+par(mfrow=c(1,1), mar=c(5,4,4,1), fg='gray40', xpd=TRUE)
+plot(dat$pd ~ dat$percentAssigned4, las=1, pch=16, cex=.6, 
+     xaxs='i', bty='o', xaxt='n',
+     col=alpha(dat$col, alpha=0.7), #col=rgb(0,0,0,.2),
+     ylab='', xlab='', log='y')
+arrows(divBars$meanX, divBars$sdPDplus, divBars$meanX, divBars$sdPDminus, 
+       code=3, angle=90, length=.03, col='gray20')
+arrows(divBars$sdXplus, divBars$meanPD, divBars$sdXminus, divBars$meanPD, 
+       code=3, angle=90, length=.03, col='gray20')
+points(divBars$meanX, divBars$meanPD, pch=21, bg=divBars$col, cex=2, col='gray20')
+```
+
+
+```{r testPD}
+summary(lm(log(dat$pd) ~ dat$percentAssigned4))
+summary(lm(dat$pd ~ dat$percentAssigned4))
+summary(lm(dat$pd ~ I(dat$percentAssigned4^2)))
+```
+
+
+```{r testJustMeans, eval=FALSE}
+summary(lm(divBars$meanPD ~ divBars$meanX))
+summary(lm(divBars$meanY ~ divBars$meanX))
+```
+
+
+
+```{r lmeDiversity}
+lme.div <- lme(H1 ~ percentAssigned4, random = ~ 1 | Description, data=dat)
+summary(lme.div) 
+lme.div.coef <- lme.div$coefficients$fixed
+
+
+lme.div2 <- lme(H1 ~ percentAssigned4 + I(percentAssigned4^2), random = ~ 1 | Description, data=dat)
+summary(lme.div2) 
+lme.div2.coef <- lme.div2$coefficients$fixed
+
+
+lme.pd <- lme(pd ~ percentAssigned4, random = ~ 1 | Description, data=dat)
+summary(lme.pd) 
+lme.pd.coef <- lme.pd$coefficients$fixed
+
+
+lme.pd2 <- lme(pd ~ percentAssigned4 + I(percentAssigned4^2), random = ~ 1 | Description, data=dat)
+summary(lme.pd2) 
+lme.pd2.coef <- lme.pd2$coefficients$fixed
+```
+
+
+
+
+
+
+
+```{r bigPlot, fig.width=7, fig.height=12}
+plotdf <- divOrdered
+# pdf('~/Desktop/techVarFigure.pdf', width=9, height=9)
+layout(matrix(c(1, 2, 3, 4, 5, 6), 3, 2), widths=c(2,1))
+
+
+
+par(mar=c(0, 4, 1, 0), fg='gray40', xpd=TRUE)
+plot(dat$pd ~ dat$percentAssigned4, las=1, pch=16, cex=.6, 
+     xaxs='i', bty='o', xaxt='n',
+     col=alpha(dat$col, alpha=0.7), #col=rgb(0,0,0,.2),
+     ylab='', xlab='', log='y')
+mtext('Phylogenetic Diversity', side=2, line=2, las=0, col='black')
+# curve(lme.pd.coef[1] + x*lme.pd.coef[2], add=TRUE, col='black', lwd=2, lty=2)
+curve(lme.pd2.coef[1] + x*lme.pd2.coef[2] + (x^2)*lme.pd2.coef[3], add=TRUE, col='black', lwd=2, lty=2)
+arrows(divBars$meanX, divBars$sdPDplus, divBars$meanX, divBars$sdPDminus, 
+       code=3, angle=90, length=.03, col='gray20')
+arrows(divBars$sdXplus, divBars$meanPD, divBars$sdXminus, divBars$meanPD, 
+       code=3, angle=90, length=.03, col='gray20')
+points(divBars$meanX, divBars$meanPD, pch=21, bg=divBars$col, cex=2, col='gray20')
+
+
+
+par(mar=c(0, 4, 0, 0), fg='gray40', xpd=TRUE)
+plot(dat$H1 ~ dat$percentAssigned4, las=1, pch=16, cex=.6, 
+     xaxs='i', bty='o', xaxt='n',
+     col=alpha(dat$col, alpha=0.7), #col=rgb(0,0,0,.2),
+     ylab='', xlab='')
+mtext('Shannon-Wiener Taxonomic Diversity', side=2, line=2, las=0, col='black')
+# curve(divCoef[1] + x*divCoef[2], add=TRUE, col='black', lwd=2, lty=2)
+# curve(lme.div.coef[1] + x*lme.div.coef[2], add=TRUE, col='black', lwd=2, lty=2)
+curve(lme.div2.coef[1] + x*lme.div2.coef[2] + (x^2)*lme.div2.coef[3], add=TRUE, col='black', lwd=2, lty=2)
+arrows(divBars$meanX, divBars$sdYplus, divBars$meanX, divBars$sdYminus, 
+       code=3, angle=90, length=.03, col='gray20')
+arrows(divBars$sdXplus, divBars$meanY, divBars$sdXminus, divBars$meanY, 
+       code=3, angle=90, length=.03, col='gray20')
+points(divBars$meanX, divBars$meanY, pch=21, bg=divBars$col, cex=2, col='gray20')
+# par(mar=c(4, 0, 1, 0))
+# plot(1,1, ann=FALSE, axes=FALSE, bty='n', type='n')
+# legend('bottomleft', legend=unique(dat$Description), pt.bg=unique(dat$col), 
+#        col='gray20', pch=21, cex=.6, bty='n', pt.cex=1.4, y.intersp=1.2)
+# dev.off()
+
+
+# divOrdered <- divBars[rev(order(divBars$meanX)), ] # happens above
+y <- 1:nrow(plotdf)
+x.lim <- c(0, 1) #range(plotdf[, c('seXminus', 'seXplus')])
+par(las=1, mar=c(4, 4, 0, 0), xpd=FALSE)
+plot(plotdf$meanX, y, type='n', xlim=x.lim, 
+     ann=FALSE, xaxt='n', yaxt='n', xaxs='i',
+     bty='o')
+abline(h=y, col='gray80', lty=3)
+par(xpd=TRUE)
+arrows(plotdf$seXminus, y,
+       plotdf$seXplus, y,
+       col='gray40', code=3, length=.03, angle=90)
+par(xpd=FALSE)
+points(plotdf$meanX, y, cex=2,
+       pch=21, bg=plotdf$col, col='gray30')
+#mtext(row.names(plotdf), at=y, side=2, line=0.5, cex=.9)
+axis(1)
+mtext(expression((Percent~of~sequences~assigned~to~GreenGenes)^{4}), 
+      side=1, at=.5, line=3, col='black')
+
+par(mar=c(0,0,1,0))
+plot(1,1,ann=FALSE,xaxt='n',yaxt='n',type='n',bty='n')
+par(mar=c(0,0,0,0))
+plot(1,1,ann=FALSE,xaxt='n',yaxt='n',type='n',bty='n')
+par(mar=c(4,0,0,0))
+plot(1,1,ann=FALSE,xaxt='n',yaxt='n',type='n',bty='n', 
+     ylim=c(1,nrow(divOrdered)), xlim=c(0,1), xaxs='i')
+text(x=0, y=c(1:nrow(divOrdered)), 
+     gsub('_', ' ', row.names(plotdf)), 
+     pos=4, col='black', cex=.9)
+
+```
+
+
+
+
+Create a dataframe of descriptive study names that we can display in the manuscript. Previously these were just names used in the original database, which were pretty uninformative. 
+
+```{r renameRN}
+studyNamesOrig <- row.names(plotdf)
+
+studyNamesDisplay <- c('Austria ICU', 
+                       'Colorado undergraduate palms', 
+                       'California NICU (SD)', 
+                       'California office', 
+                       'Ireland elderly gut', 
+                       'Europe/Africa children gut', 
+                       'Colorado body sites', 
+                       'Colorado restroom surfaces', 
+                       'France building air', 
+                       'Oregon classroom surfaces', 
+                       'Colorado mountaintop air', 
+                       'Colorado family', 
+                       'North Carolina homes', 
+                       'Oregon classroom air', 
+                       'France museum air', 
+                       'Oregon university dust', 
+                       'Colorado kitchen surfaces', 
+                       'California dairy', 
+                       'South Korea homes', 
+                       'Connecticut classroom air', 
+                       'California NICU (Sac)', 
+                       'California residence air (Berk)', 
+                       'N + S America soils')
+studyNames <- data.frame(studyNamesOrig, studyNamesDisplay)
+
+```
+
+
+```{r justPercentAssigned}
+plotdf <- divOrdered1
+pdf('perAssigned.pdf', height=4, width=6, useDingbats=FALSE)
+y <- 1:nrow(plotdf)
+x.lim <- c(.4, 1)#range(plotdf[, c('seXminus', 'seXplus')])
+par(las=1, mar=c(3, 1, 1, 9), xpd=FALSE)
+plot(plotdf$meanX, y, type='n', xlim=x.lim, 
+     ann=FALSE, xaxt='n', yaxt='n', xaxs='i',
+     bty='n')
+abline(h=y, col='gray80', lty=3)
+par(xpd=TRUE)
+arrows(plotdf$seXminus, y,
+       plotdf$seXplus, y,
+       col='gray40', code=3, length=.03, angle=90)
+text(x=1.02, y=c(1:nrow(divOrdered)), 
+     gsub('_', ' ', studyNamesDisplay), 
+     pos=4, col='black', cex=.7)
+par(xpd=FALSE)
+points(plotdf$meanX, y, cex=2,
+       pch=21, bg=plotdf$col, col='gray30')
+axis(1, at=seq(.4, 1, .1), tck=.01, labels = FALSE, line=.5)
+axis(1, at=seq(.4, 1, .2), tck=.02, labels=FALSE, line=.5)
+axis(1, at=seq(.4, 1, .2), tick=FALSE, labels=seq(40, 100, 20), line=-.5, cex=.5)
+mtext('Percent of sequences assigned to GreenGenes', 
+      side=1, at=.7, line=1.5, col='black')
+
+dev.off()
+```
+
+```{r}
+refNames <- row.names(divOrdered)
+refNamesDisplay <- gsub('_', ' ', studyNamesDisplay)
+refCol <- divOrdered$col
+
+pdf('perAssigned_density.pdf', height=5, width=7, useDingbats=FALSE)
+
+layout(matrix(c(1:(nstudies+2)), nstudies+2, 1), heights=c(.1, rep(1, nstudies), 3))
+par(mar=c(0,1,0,19))
+plot(0,0, type='n', ann=FALSE, axes=FALSE)
+for(i in 1:nstudies){
+  subDat <- density(dat$percentAssigned[dat$Description == refNames[i]])
+  plot(0,0, type='n', ann=FALSE, axes=FALSE, 
+       xlim=c(0, max(dat$percentAssigned)), 
+       ylim=c(0, max(subDat$y)), 
+       xaxs='i')
+  rect(0, 0, 1, 100, col='gray90', border='transparent')
+  abline(v=seq(0, 1, .1), col=rgb(1,1,1), lwd=1)  
+  polygon(subDat, col=refCol[i])
+  mtext(paste(refNamesDisplay[i], ' (', subDat$n, ')', sep=''), 
+        side=4, las=1, cex=.8, line=0.5)
+  }
+plot(0,0, type='n', ann=FALSE, axes=FALSE, 
+     xlim=c(0, max(dat$percentAssigned)), 
+     ylim=c(0, max(subDat$y)), xaxs='i')
+par(xpd=TRUE)
+axis(1, at=seq(0, 1, .1), tck=.05, labels = FALSE, line=-3)
+axis(1, at=seq(0, 1, .2), tck=.1, labels=FALSE, line=-3)
+axis(1, at=seq(0, 1, .2), tick=FALSE, labels=seq(00, 100, 20), line=-4, cex=.5)
+mtext('Percent of sequences assigned to GreenGenes', 
+      side=1, at=.5, line=-1.5, col='black')
+
+dev.off()
+```
+
+
+
+```{r exportNamesColors}
+studyNamesDF <- data.frame(refNames, refNamesDisplay, refCol)
+```
+
+
+
+
+
+
+
+
+### Import source tracker
+
+
+
+```{r sourceTracker}
+colnames(sT.full)
+#sT.full[, 'Unknown']
+all(row.names(sT.full) %in% row.names(map))  # so all in original map
+all(row.names(sT.full) %in% row.names(dat))  # but not in filtered dat
+sT <- data.frame(sT.full[which(row.names(sT.full) %in% row.names(dat)), ])
+# head(dat)
+sT$Target_Region <- as.character(dat[row.names(sT), 'Target_Region'])
+sT$Description <- as.character(dat[row.names(sT), 'Description'])
+sT$Known <- 1-sT$Unknown
+# head(sT)
+```
+
+
+
+Make ordered set for barplots. 
+
+```{r}
+se <- function(x) {sd(x)/sqrt(length(x))}
+
+sTbars <- data.frame(matrix(0, length(unique(sT$Description)), 4))
+row.names(sTbars) <- sort(unique(sT$Description))
+names(sTbars) <- c('mean', 'se', 'sePlus', 'seMinus')
+sTbars$mean <- aggregate(sT$Known, by=list(sT$Description), FUN=mean)$x
+sTbars$se <- aggregate(sT$Known, by=list(sT$Description), FUN=se)$x
+sTbars$sePlus <- sTbars$mean + sTbars$se
+sTbars$seMinus <- sTbars$mean - sTbars$se
+
+sTbars$seqTech <- ''
+
+for (i in 1:nrow(sTbars)) {
+  this <- row.names(sTbars)[i]
+  sTbars$seqTech[i] <- names(table(sT$Target_Region[sT$Description == this]))
+}
+
+# cols5 <- rev(wes_palette('Darjeeling', 5))
+# cols5 <- rev(wes.palette(5, 'Darjeeling2'))  # not here for some reason?
+cols5 <- rev(wes_palette('Darjeeling2', 5))
+sTbars$col <- ''
+seqTech5 <- unique(sTbars$seqTech)[c(1, 4, 3, 2, 5)]
+
+for(i in 1:length(unique(sTbars$seqTech))) {
+  this <- seqTech5[i]
+  sTbars$col[sTbars$seqTech == this] <- cols5[i]
+  }
+
+sTbars.sort <- sTbars[order(sTbars$mean), ]
+```
+
+
+
+```{r}
+keepSources <- c('outdoor_air', 'source_ear', 'source_feces', 
+                 'source_mouth', 'source_nose', 'source_skin', 
+                 'source_urine', 'source_soil', 'kit_control', 'Unknown')
+keepSourceNames <- c('Outdoor air', 'Ear', 'Feces', 'Mouth', 'Nose', 
+                     'Skin', 'Urine', 'Soil', 'Kit', 'Unknown')
+sTsources <- aggregate(sT[, keepSources], by=list(sT$Description), FUN='mean')
+row.names(sTsources) <- studyNames$studyNamesDisplay[match(sTsources$Group.1, studyNames$studyNamesOrig)]
+sTsources <- sTsources[rev(order(sTsources$Unknown)), -1]
+
+# cols.11 <- c('#A50026', '#D73027', '#F46D43', '#FDAE61', '#FEE090', 
+#             '#E0F3F8', '#ABD9E9', '#74ADD1', '#4575B4', '#313695', '#969A97')
+cols.10 <- c('#A50026', '#D73027', '#F46D43', '#FDAE61', '#FEE090', 
+            '#ABD9E9', '#74ADD1', '#4575B4', '#313695', '#969A97')
+
+
+
+
+par(mar=c(1, 12, 1, 1))
+# barplot(t(sTsources), horiz=TRUE, las=1, col=cols.10, space = 0)
+```
+
+
+
+
+
+
+
+
+```{r, fig.height=5, fig.width=8}
+dF <- sTbars.sort
+newNames <- studyNames$studyNamesDisplay[match(row.names(dF), studyNames$studyNamesOrig)]
+pdf('sTbars2015.pdf', width=8, height=5)
+par(mar=c(5, 14, 1, 1), las=1)
+mids <- barplot(dF$mean, horiz=TRUE, xaxt='n',
+        col=dF$col, border='transparent', xlim=c(0,1))
+abline(v=seq(0, 1, .1), col='white')
+arrows(dF$seMinus, mids, dF$sePlus, mids, 
+       angle=90, code=3, length=.03)
+mtext(newNames, side=2, at=mids, line=.3)
+axis(1, at=seq(0, 1, .1), labels=FALSE, tck=-.01)
+axis(1, at=seq(0, 1, .2), labels=c(0, 20, 40, 60, 80, 100))
+legend('bottomright', legend=seqTech5, pch=15, col=cols5, 
+       pt.cex=2.5, bty='n')
+mtext('Percent of OTUs assigned using SourceTracker', 1, line=2.3)
+dev.off()
+```
+
+
+
+```{r, fig.height=5, fig.width=10}
+dF <- sTbars.sort
+newNames <- studyNames$studyNamesDisplay[match(row.names(dF), studyNames$studyNamesOrig)]
+pdf('sTbarsWithSources.pdf', width=13, height=5)
+layout(matrix(c(1,2),1,2), widths=c(1.3,1))
+par(mar=c(5, 14, 1, 1), las=1)
+mids <- barplot(dF$mean, horiz=TRUE, xaxt='n',
+        col=dF$col, border='transparent', xlim=c(0,1))
+abline(v=seq(0, 1, .1), col=rgb(1,1,1,.4))
+arrows(dF$seMinus, mids, dF$sePlus, mids, 
+       angle=90, code=3, length=.03)
+mtext(newNames, side=2, at=mids, line=.3)
+axis(1, at=seq(0, 1, .1), labels=FALSE, tck=-.01)
+axis(1, at=seq(0, 1, .2), labels=c(0, 20, 40, 60, 80, 100))
+legend('bottomright', legend=seqTech5, pch=15, col=cols5, 
+       pt.cex=2.5, bty='n')
+mtext('Percent of OTUs assigned using SourceTracker', 1, line=2.3)
+mtext('(a)', side=3, adj=0, cex=1.5, font=2, line=-.5)
+
+par(mar=c(5, 1, 1, 8), las=1)
+barplot(t(sTsources), horiz=TRUE, las=1, col=cols.10, border='transparent',
+        names.arg=rep('', nrow(sTsources)), axes=FALSE)
+abline(v=seq(0, 1, .1), col=rgb(1,1,1,.4))
+axis(1, at=seq(0, 1, .1), labels=FALSE, tck=-.01)
+axis(1, at=seq(0, 1, .2), labels=c(0, 20, 40, 60, 80, 100))
+par(xpd=TRUE)
+legend(1, 10.8, legend=keepSourceNames, col=cols.10, pch=15, bty='n', pt.cex=2.5)
+mtext('Percent of each source type assigned', 1, line=2.3)
+mtext('(b)', side=3, adj=0, cex=1.5, font=2, line=-.5)
+
+
+dev.off()
+```
+
+
+
+```{r, fig.height=5, fig.width=10}
+dF <- sTbars.sort
+newNames <- studyNames$studyNamesDisplay[match(row.names(dF), studyNames$studyNamesOrig)]
+pdf('sTbarsWithSources2.pdf', width=13, height=5)
+layout(matrix(c(1,2),1,2), widths=c(1,1.3))
+
+par(mar=c(5, 7, 1, 1), las=1)
+barplot(t(sTsources), horiz=TRUE, las=1, col=cols.10, border='transparent',
+        names.arg=rep('', nrow(sTsources)), axes=FALSE)
+abline(v=seq(0, 1, .1), col=rgb(1,1,1,.4))
+axis(1, at=seq(0, 1, .1), labels=FALSE, tck=-.01)
+axis(1, at=seq(0, 1, .2), labels=c(0, 20, 40, 60, 80, 100))
+par(xpd=TRUE)
+legend(-.35, 10.8, legend=keepSourceNames, col=cols.10, pch=15, bty='n', pt.cex=2.5)
+mtext('Percent of each source type assigned', 1, line=2.3)
+mtext('(a)', side=3, adj=0, cex=1.5, font=2, line=-.5)
+
+par(mar=c(5, 14, 1, 1), las=1)
+mids <- barplot(dF$mean, horiz=TRUE, xaxt='n',
+        col=dF$col, border='transparent', xlim=c(0,1))
+abline(v=seq(0, 1, .1), col=rgb(1,1,1,.4))
+arrows(dF$seMinus, mids, dF$sePlus, mids, 
+       angle=90, code=3, length=.03)
+text(-.35, mids, newNames)
+axis(1, at=seq(0, 1, .1), labels=FALSE, tck=-.01)
+axis(1, at=seq(0, 1, .2), labels=c(0, 20, 40, 60, 80, 100))
+legend('bottomright', legend=seqTech5, pch=15, col=cols5, 
+       pt.cex=2.5, bty='n')
+mtext('Percent of OTUs assigned using SourceTracker', 1, line=2.3)
+mtext('(b)', side=3, adj=0, cex=1.5, font=2, line=-.5)
+
+dev.off()
+```
+
+
+
+
+
+
+
+
+
+
+```{r, eval=FALSE}
+
+# dat$aveSeqLength
+# dat$percentAssigned
+
+# dat[c(1:500), c('Room_Function', 'Specific_Matrix')]
+
+dat$SeqTech2 <- 'Illumina'
+dat$SeqTech2[grep('454', dat$Sequencing_Technology)] <- '454'
+boxplot(dat$H1 ~ dat$Sequencing_Technology)
+boxplot(dat$H1 ~ dat$SeqTech2)
+t.test(dat$H1 ~ dat$SeqTech2)
+boxplot(dat$percentAssigned ~ dat$SeqTech2)
+t.test(dat$percentAssigned ~ dat$SeqTech2)
+table(dat$SeqTech2)
+boxplot(aves$avgSeqLength ~ aves$platform)
+t.test(aves$avgSeqLength ~ aves$platform)
+table(aves$platform)
+```
+
+
+
+
+```{r savestuff}
+save(dat, studyNamesDF, file='dfWithColors.RData')
+```
+
+
+
+

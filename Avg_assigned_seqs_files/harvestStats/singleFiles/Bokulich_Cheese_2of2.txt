@@ -1,0 +1,20 @@
+2014-08-14 15:21:28
+
+------------
+
+8 samples in ../split_library_log/Bokulich_Cheese_2of2_split_library_log.txt
+86 samples in ../otu_table_stats/Bokulich_Cheese_otu_table_stats.txt
+
+------------
+sample	splitLibLog	otuTableStats	percent
+Cheese.B2.1135601	65341.0	43789.0	0.670161154558
+Cheese.A2.1135589	61787.0	48439.0	0.783967501254
+Cheese.A1.1135569	55544.0	44924.0	0.808800230448
+Cheese.A3.1135609	48786.0	39585.0	0.811400811708
+Cheese.B3.1135586	37069.0	26966.0	0.727454207019
+Cheese.A4.1135570	27095.0	18019.0	0.665030448422
+Cheese.B4.1135633	25639.0	14212.0	0.554311790631
+Cheese.B1.1135637	15102.0	9168.0	0.607071911005
+------------
+Mean =  0.703524756881 percent of seqs made it into OTU table
+SD =  0.0893912920565

@@ -1,0 +1,309 @@
+---
+output: html_document
+---
+
+
+Kit control figures. 
+
+
+```{r config, echo=FALSE}
+library(knitr)
+opts_chunk$set(background='gray80', tidy=FALSE, cache=TRUE, keep_md=TRUE, 
+               fig.path='figure/', fig.height=7, fig.width=7)
+```
+
+
+
+
+```{r setSeed}
+set.seed(942)
+```
+
+
+
+```{r loadPackages}
+library(biom)
+library(qiimer)
+library(scales)
+library(labdsv)
+# setwd("~/Dropbox/BEMA/bacteriaHTS/closed_ref_pickedOTUs/R/kitControls/")
+```
+
+
+#### Read in OTU table, mapping file, and unifrac distance matrix generated with Qiime. ####
+
+Read in OTU table using qiimer package
+
+```{r readClosedRef}
+rawBiom.closed <- read_biom('closedref_leff_flores_merged.biom')
+table.biom.closed <- biom_raw_data(rawBiom.closed)
+tab.c <- t(matrify(table.biom.closed))  # make long form
+tab.c[1:5, 1:5]
+dim(tab.c)
+```
+
+
+```{r readOpenRef}
+rawBiom.open <- read_biom('otu_table_mc2_w_tax_phinch_22Aug.biom')
+table.biom.open <- biom_raw_data(rawBiom.open)
+tab.o <- t(matrify(table.biom.open))  # make long form
+tab.o[1:5, 1:5]
+dim(tab.o)
+```
+
+
+```{r}
+identical(row.names(tab.o) , row.names(tab.c))
+
+```
+
+
+
+Read in mapping file, and jive big OTU table. 
+
+```{r readMap}
+map <- read_qiime_mapping_file('gdocs_mapping_file_13May_1130am.txt')
+row.names(map) <- map$SampleID
+```
+
+
+
+```{r}
+kc <- row.names(map)[which(map$Matrix == 'kit_control')]
+kc.keep <- intersect(kc, row.names(tab.c))
+map.kc <- map[kc.keep, ]
+
+tab.c.kc <- tab.c[kc.keep, ]
+tab.o.kc <- tab.o[kc.keep, ]
+
+tab.c.kc <- tab.c.kc[order(rowSums(tab.c.kc)), colSums(tab.c.kc) > 0]
+tab.o.kc <- tab.o.kc[row.names(tab.c.kc), colSums(tab.o.kc) > 0]
+
+dim(tab.c.kc)
+dim(tab.o.kc)
+dim(map.kc)
+```
+
+
+```{r}
+taxa.list.closed <- biom_taxonomy(rawBiom.closed, attr='taxonomy')
+taxa.c <- suppressWarnings(data.frame(do.call('rbind', taxa.list.closed)))
+names(taxa.c) <- c('Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species')
+
+for(i in 1:ncol(taxa.c)) {
+  taxa.c[, i] <- gsub('[[:alpha:]]{1}\\_\\_$', '--', taxa.c[, i])
+  taxa.c[, i] <- gsub('^[[:alpha:]]{1}\\_\\_', '', taxa.c[, i])
+  }
+head(taxa.c)
+```
+
+```{r}
+taxa.list.open <- biom_taxonomy(rawBiom.open, attr='taxonomy')
+taxa.o <- suppressWarnings(data.frame(do.call('rbind', taxa.list.open)))
+names(taxa.o) <- c('Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species')
+
+for(i in 1:ncol(taxa.o)) {
+  taxa.o[, i] <- gsub('[[:alpha:]]{1}\\_\\_$', '--', taxa.o[, i])
+  taxa.o[, i] <- gsub('^[[:alpha:]]{1}\\_\\_', '', taxa.o[, i])
+  }
+head(taxa.o)
+```
+
+
+
+```{r}
+taxa.o <- taxa.o[colnames(tab.o.kc), ]
+taxa.c <- taxa.c[colnames(tab.c.kc), ]
+```
+
+
+
+```{r}
+plot(rowSums(tab.c.kc) ~ rowSums(tab.o.kc))
+abline(0, 1)
+range(rowSums(tab.c.kc))
+range(rowSums(tab.o.kc))
+```
+
+
+```{r}
+maxx <- 20000
+whitelines <- seq(0, maxx, 2500) 
+nbar <- nrow(tab.c.kc)
+# Colors from the countData folder. Match other figures. 
+cols <- c(rep('#798E87', 3), rep('#78B7C5', 24))
+layout(matrix(c(1,2), 1, 2), widths=c(1,1))
+
+par(mar=c(4, 1, 2, 2))
+barplot(-rowSums(tab.c.kc), horiz=TRUE, axes=FALSE, 
+        xlim=c(-maxx, 0), xaxs='i', names.arg=rep('', nbar), 
+        col=cols, border='transparent')
+abline(v=-whitelines, col='white')
+axis(side=1, at=-whitelines, labels = FALSE, tck=-.01)
+axis(side=1, at=c(0, -10000, -20000), 
+     labels=c(0, 10000, 20000), tck=-.03)
+
+par(mar=c(4, 2, 2, 1))
+
+barplot(rowSums(tab.o.kc), horiz=TRUE, axes=FALSE, 
+        xlim=c(0, maxx), xaxs='i', names.arg=rep('', nbar), 
+        col=cols, border='transparent')
+abline(v=whitelines, col='white')
+axis(side=1, at=whitelines, labels = FALSE, tck=-.01)
+axis(side=1, at=c(0, 10000, 20000), labels = TRUE, tck=-.03)
+
+
+```
+
+
+
+```{r}
+tab.c.kc.rel <- tab.c.kc/rowSums(tab.c.kc)
+tax.c.bars.tmp <- aggregate(t(tab.c.kc.rel), 
+                            by=list(taxa.c$Phylum), 
+                            FUN='sum')
+tax.c.bars <- t(tax.c.bars.tmp[, -1])
+colnames(tax.c.bars) <- tax.c.bars.tmp$Group.1
+tax.c.bars <- tax.c.bars[, rev(order(colSums(tax.c.bars)))]
+tax.c.bars.top6 <- tax.c.bars[, 1:6]
+tax.c.bars.top6 <- cbind(tax.c.bars.top6, 
+                         rowSums(tax.c.bars[, c(7:ncol(tax.c.bars))]))
+colnames(tax.c.bars.top6)[7] <- 'Other'
+```
+
+
+
+```{r}
+tab.o.kc.rel <- tab.o.kc/rowSums(tab.o.kc)
+tax.o.bars.tmp <- aggregate(t(tab.o.kc.rel), 
+                            by=list(taxa.o$Phylum), 
+                            FUN='sum')
+tax.o.bars <- t(tax.o.bars.tmp[, -1])
+colnames(tax.o.bars) <- tax.o.bars.tmp$Group.1
+tax.o.bars.top6 <- tax.o.bars[, colnames(tax.c.bars.top6)[1:6]]
+takeout <- c(colnames(tax.o.bars.top6), 'Unassigned')
+takeout.index <- which(colnames(tax.o.bars) %in% takeout)
+tax.o.bars.top6 <- cbind(tax.o.bars.top6, 
+                         rowSums(tax.o.bars[, -takeout.index]),  
+                         tax.o.bars[, 'Unassigned'])
+colnames(tax.o.bars.top6)[7:8] <- c('Other', 'Unassigned')
+
+```
+
+```{r}
+all(colnames(tax.o.bars) %in% colnames(tax.c.bars))
+setdiff(colnames(tax.o.bars), colnames(tax.c.bars))
+dim(tax.o.bars)
+names(rev(sort(colSums(tax.o.bars))))[1:10] %in% 
+  names(rev(sort(colSums(tax.c.bars))))[1:10]
+```
+
+
+```{r, fig.width=3, fig.height=3}
+cols.8 <- c('#A50026', '#F46D43', '#FDAE61', '#FEE090', 
+            '#ABD9E9', '#4575B4', '#313695', '#969A97')
+
+plot(1:8, 1:8, type='n')
+points(rep(1, 8), 1:8, pch=16, col=cols.8, cex=2)
+```
+
+
+
+```{r}
+mat <- tax.c.bars.top6
+barplot(t(mat), col=cols.8, horiz=TRUE, border='transparent', 
+        names.arg=rep('', nrow(mat)), space=.05)
+mat <- tax.o.bars.top6
+barplot(t(mat), col=cols.8, horiz=TRUE, border='transparent', 
+        names.arg=rep('', nrow(mat)), space=.05)
+
+```
+
+
+
+
+```{r}
+maxx <- 20000
+whitelines <- seq(0, maxx, 2500) 
+nbar <- nrow(tab.c.kc)
+# Colors from the countData folder. Match other figures. 
+cols <- c(rep('#798E87', 3), rep('#78B7C5', 24))
+
+pdf('kit_control_total.pdf', width=7, height=8, useDingbats = FALSE)
+
+layout(matrix(c(1,3,2,4), 2, 2), widths=c(1,1))
+
+par(mar=c(4, 2, 2, 2))
+barplot(-rowSums(tab.c.kc), horiz=TRUE, axes=FALSE, 
+        xlim=c(-maxx, 0), xaxs='i', names.arg=rep('', nbar), 
+        col=cols, border=alpha('white', .4), space=0)
+abline(v=-whitelines, col='white')
+axis(side=1, at=-whitelines, labels = FALSE, tck=-.01)
+axis(side=1, at=c(0, -10000, -20000), 
+     labels=c(0, 10000, 20000), tck=-.03)
+mtext('Closed-reference', font=2)
+mtext('(a)', font=2, adj=0)
+text(-17000, 20, 'NC Homes', font=4, cex=1.2, col='#78B7C5')
+text(-4000, 1, 'CO Kitchens', font=4, cex=1.2, col='#798E87')
+
+
+
+par(mar=c(4, 2, 2, 2))
+
+barplot(rowSums(tab.o.kc), horiz=TRUE, axes=FALSE, 
+        xlim=c(0, maxx), xaxs='i', names.arg=rep('', nbar), 
+        col=cols, border=alpha('white', .4), space=0)
+abline(v=whitelines, col='white')
+axis(side=1, at=whitelines, labels = FALSE, tck=-.01)
+axis(side=1, at=c(0, 10000, 20000), labels = TRUE, tck=-.03)
+mtext('Open-reference', font=2)
+mtext('(b)', font=2, adj=0)
+
+
+par(mar=c(4,1,2,6))
+
+mat <- tax.c.bars.top6
+mids <- barplot(t(mat), col=cols.8, horiz=TRUE, border=alpha('white', .4), 
+        names.arg=rep('', nrow(mat)), space=0, axes=FALSE)
+mtext('(d)', font=2, adj=0)
+axis(1, at=c(0, 1), labels=c(100, 0))
+
+segments(rep(1.05, 2), c(mids[1], mids[4]), 
+         rep(1.05, 2), c(mids[3], mids[length(mids)]), 
+         col=c('#798E87', '#78B7C5'), lwd=12, xpd=TRUE, lend='square')
+
+par(mar=c(4,6,2,1))
+
+mat <- tax.o.bars.top6[, ncol(tax.o.bars.top6):1]
+barplot(t(mat), col=rev(cols.8), horiz=TRUE, border=alpha('white', .4), 
+        names.arg=rep('', nrow(mat)), space=0, axes=FALSE)
+mtext('(e)', font=2, adj=0)
+axis(1, at=c(0, 1), labels=c(0, 100))
+
+
+segments(rep(-.05, 2), c(mids[1], mids[4]), 
+         rep(-.05, 2), c(mids[3], mids[length(mids)]), 
+         col=c('#798E87', '#78B7C5'), lwd=12, xpd=TRUE, lend='square')
+
+par(mfrow=c(1,1), new = TRUE, mar=c(0,0,0,0))
+plot(1,1, ann=FALSE, axes=FALSE, type='n', 
+     xlim=c(0,1), ylim=c(0,1), xaxs='i', yaxs='i')
+legend(.4, .44, legend=colnames(tax.o.bars.top6), y.intersp = .8, 
+       pch=15, pt.cex=2, col=cols.8, cex=.8, bty='n', )
+text(.5, .17, '- NC Homes -', font=4, cex=1.2, col='#78B7C5')
+text(.5, .12, '- CO Kitchens -', font=4, cex=1.2, col='#798E87')
+text(.5, .525, 'Total number of reads assigned to control samples', cex=1)
+text(.5, .03, 'Reltative abundance of phyla in control samples', cex=1)
+
+par(plt=c(.8, .96, .62, .75), new=TRUE)#, mar=c(1,1,0,0))
+plot(1,1, bty='l', type='n', xlab='', ylab='', 
+     xaxt='n', yaxt='n', 
+     xlim=c(0, 20000), ylim=c(0, 20000))
+abline(0, 1, lty=3, col='tomato')
+points(rowSums(tab.o.kc), rowSums(tab.c.kc), 
+       pch=21, col='gray30', lwd=.3, bg=alpha(cols, .8))
+mtext('Open', side=1, at=5000, cex=.7, col='gray20', line=-.2)
+mtext('Closed', side=2, at=5000, cex=.7, col='gray20', line=0, las=0)
+mtext('(c)', side=3, at=2000, cex=1, line=-.5, font=2)
+dev.off()
+```

@@ -1,0 +1,24 @@
+Num samples: 3
+Num observations: 2893
+Total count: 33547
+Table density (fraction of non-zero values): 0.483
+Table md5 (unzipped): 8b4c00ff34f9cd8d346be484306c285e
+
+Counts/sample summary:
+ Min: 9872.0
+ Max: 13210.0
+ Median: 10465.000
+ Mean: 11182.333
+ Std. dev.: 1454.072
+ Sample Metadata Categories: None provided
+ Observation Metadata Categories: taxonomy
+
+Counts/sample detail:
+ Office: 9872.0
+ Hospital: 10465.0
+ Louvre: 13210.0
+
+-----------------------------
+
+this many sequences were in the original "seq.fna" file:
+36369

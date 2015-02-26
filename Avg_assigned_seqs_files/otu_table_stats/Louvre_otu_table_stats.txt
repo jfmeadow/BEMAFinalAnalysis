@@ -1,0 +1,24 @@
+Num samples: 3
+Num observations: 2351
+Total count: 23582
+Table density (fraction of non-zero values): 0.488
+Table md5 (unzipped): 47803e00998eba8ef682c3e671db5f91
+
+Counts/sample summary:
+ Min: 7275.0
+ Max: 8334.0
+ Median: 7973.000
+ Mean: 7860.667
+ Std. dev.: 439.571
+ Sample Metadata Categories: None provided
+ Observation Metadata Categories: taxonomy
+
+Counts/sample detail:
+ LJ1: 7275.0
+ LS4: 7973.0
+ LS3: 8334.0
+
+-----------------------------
+
+this many sequences were in the original "seq.fna" file:
+26967

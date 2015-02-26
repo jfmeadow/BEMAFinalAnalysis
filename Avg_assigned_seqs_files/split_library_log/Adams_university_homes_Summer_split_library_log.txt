@@ -1,0 +1,60 @@
+Number raw input seqs	29253
+
+Length outside bounds of 200 and 1000	61
+Num ambiguous bases exceeds limit of 6	69
+Missing Qual Score	0
+Mean qual score below minimum of 25	3899
+Max homopolymer run exceeds limit of 6	167
+Num mismatches in primer exceeds limit of 0: 2334
+
+Sequence length details for all sequences passing quality filters:
+Raw len min/max/avg	200.0/682.0/345.3
+Wrote len min/max/avg	175.0/657.0/320.3
+
+Barcodes corrected/not	100/0
+Uncorrected barcodes will not be written to the output fasta file.
+Corrected barcodes will be written with the appropriate barcode category.
+Corrected but unassigned sequences will not be written unless --retain_unassigned_reads is enabled.
+
+Total valid barcodes that are not in mapping file	0
+Sequences associated with valid barcodes that are not in the mapping file will not be written.
+
+Barcodes in mapping file
+Num Samples	33
+Sample ct min/max/mean: 25 / 1462 / 688.58
+Sample	Sequence Count	Barcode
+Summer.3.Balcony	1462	TCTCTATGCG
+Summer.1.Balcony	1449	AGACGCACTC
+Summer.5.Balcony	1393	ACGACTACAG
+Summer.9.Balcony	1225	TACACACACT
+Summer.2.Balcony	1175	ATCAGACACG
+Summer.6.Balcony	1109	TAGAGACGAG
+Summer.5.Bedroom	820	TGTACTACTC
+Summer.6.Bedroom	794	TACTCTCGTG
+Summer.6.K	770	CGTAGACTAG
+Summer.7.Balcony	750	AGACTATACT
+Summer.5.Bath	721	TCTACGTAGC
+Summer.6.Bath	700	TACGAGTATG
+Summer.1.Bedroom	697	ACGCTCGACA
+Summer.3.Bedroom	679	CTCGCGTGTC
+Summer.2.Bath	677	AGCACTGTAG
+Summer.4.Bedroom	653	ATACGACGTA
+Summer.5.LR	650	CGTCTAGTAC
+Summer.4.Bath	624	CGAGAGATAC
+Summer.7.Bath	620	ACTGTACAGT
+Summer.1.LR	587	ACGAGTGCGT
+Summer.4.Balcony	561	TCACGTACTA
+Summer.8.Bedroom	499	ATAGAGTACT
+Summer.7.LR	491	ACTACTATGT
+Summer.11.Balcony	484	TCGATCACGT
+Summer.9.K	421	CAGTAGACGT
+Summer.8.Balcony	421	CACGCTACGT
+Summer.10.K	419	TACACGTGAT
+Summer.8.LR	414	AGTACGCTAT
+Summer.8.K	412	AGCGTCGTCT
+Summer.10.LR	361	TACAGATCGT
+Summer.7.K	352	ACGCGAGTAT
+Summer.9.Bath	308	CGACGTGACT
+Summer.Negative.neg.ext.1	25	TCGTCGCTCG
+
+Total number seqs written	22723

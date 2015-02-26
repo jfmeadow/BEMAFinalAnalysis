@@ -1,0 +1,62 @@
+
+
+FloresJeonLeff subset study: scripts
+
+Preparation of OTU_table, associated mapping file, and generation of unweighted unifrac distance matrix.
+
+###############################################
+
+### Merge the 4 studies’ OTU tables together
+merge_otu_tables.py -i otu_table_Flores_Residential_Kitchen_Microbiology_1566.biom,otu_table_Flores_restroom_surface_biogeography_1335.biom,otu_table_Jeon_korea_house_2025.biom,otu_table_Leff_forty_homes_HiSeq_1772.biom -o mergedF.biom 
+
+
+
+
+### Rarefy merged OTU table to 1000 sequences per sample
+single_rarefaction.py -i mergedF.biom -o mergedF_otu_table_even1000.biom -d 1000
+
+
+
+
+#### Filter any remaining “source” samples from merged OTU table
+filter_samples_from_otu_table.py -i mergedF_otu_table_even1000.biom -o mergedF_no_source.biom -m FloresJeonLeff_MF3.txt -s 'Building_Type:*,!source' 
+
+
+### Filter any “kit control” samples from merged OTU table
+filter_samples_from_otu_table.py -i mergedF_no_source.biom -o mergedF_no_source_no_kit.biom -m FloresJeonLeff_MF3.txt -s 'Building_Type:*,!kit_control' --output_mapping_fp mergedMapF_no_source_no_kit.txt 
+
+
+### Filter “contaminant taxa” from merged OTU table
+
+filter_taxa_from_otu_table.py -i mergedF_no_source_no_kit.biom -o mergedF_no_source_no_kit_less_contam.biom -n p__Tenericutes,o__Oceanospirillales,o__Tremblayales,o__Alteromonadales,o__EW055
+
+#phylum Tenericutes
+#order Oceanospirillales 
+#order Tremblayales
+#order Alteromonadales
+#order EW055
+
+
+### Filter any OTUs represented only once from merged OTU table
+filter_otus_from_otu_table.py -i mergedF_no_source_no_kit_less_contam.biom -o mergedF_no_source_no_kit_less_contam.biom -n 1
+
+###### run the beta diversity analysis:
+
+
+#-i: input biom file
+#-m: mapping file
+#-p: parameter file specifying diversity indices to use
+#-e: rarefaction number 
+#-o: output folder
+#-a -O 4: specifies run in parallel on 4 processors 
+
+
+## unweighted-unifrac ##
+
+#######this script produces the unweighted unifrac distance matrix that I used for that portion of the FloresJeonLeff subset analysis.
+beta_diversity_through_plots.py -i mergedF_no_source_no_kit_less_contam.biom -m mergedMapF_no_source_no_kit.txt -p params_unweightedunifrac.txt -o beta_ununifF/ -t /macqiime/greengenes/gg_13_8_otus/trees/97_otus.tree -f
+
+
+
+#### converts merged OTU table from BIOM format to a text file
+biom convert -i mergedF_no_source_no_kit_less_contam.biom -o Ftable.from_biom_w_taxonomy.txt -b --header-key taxonomy

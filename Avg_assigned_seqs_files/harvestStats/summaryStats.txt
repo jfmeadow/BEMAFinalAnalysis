@@ -1,0 +1,38 @@
+2014-08-14 15:22:00
+
+------------
+
+studyName	meanAssigned	sdAssigned
+
+Adams_university_homes_Summer.txt	0.481543921931	0.149376040756
+Adams_university_homes_Winter.txt	0.691788761109	0.126499861094
+Bokulich_Cheese_1of2.txt	0.651164583693	0.205878721028
+Bokulich_Cheese_2of2.txt	0.703524756881	0.0893912920565
+Bokulich_NICU.txt	0.539383086502	0.102224168309
+Bowers_Storm_Peak.txt	0.833840296596	0.206383118654
+Claesson_elderly_gut_study_486.txt	0.938293090647	0.0315785134314
+Costello_body.txt	0.927598709189	0.0455966048025
+Defilippo_children_and_diets_study_496.txt	0.932441262508	0.0316878997772
+Fierer_undergraduate_palms.txt	0.947830363915	0.0350266489346
+Flores_Residential_Kitchen_Microbiology_study_1566.txt	0.679004263687	0.270841378926
+Flores_restroom_surface_biogeography_study_1335.txt	0.916416930842	0.0745998657947
+Gauzere_core_1of3.txt	0.941012498876	0.0
+Gauzere_core_2of3.txt	0.922164048866	0.0
+Gauzere_core_3of3.txt	0.903781012542	0.0
+Hospodsky_Classrooms_1of2.txt	0.509604675414	0.0457387951823
+Hospodsky_Classrooms_2of2.txt	0.857290486291	0.0246788784328
+Jeon_korea_house_study_2025.txt	0.608041703622	0.176810345511
+Kelley_Newborn_ICU_study.txt	0.942223706133	0.0467456251936
+Kelley_office_contamination.txt	0.939452344641	0.0406948483006
+Kembel_BELillis_dust_1of2.txt	0.856614856375	0.0542706697421
+Kembel_BELillis_dust_2of2.txt	0.856749859593	0.102397080235
+Lauber_88_soils_study_103.txt	0.47403080496	0.0596443051853
+Leff_40_homes_study_1772.txt	0.863709778292	0.159060449067
+Louvre.txt	0.87419355522	0.00581898198399
+Meadow_BELillis_1of4.txt	0.949890241566	0.0322675518332
+Meadow_BELillis_2of4.txt	0.886630186544	0.0458179467767
+Meadow_BELillis_3of4.txt	0.902885655424	0.031236180735
+Meadow_BELillis_4of4.txt	0.691242686773	0.11214542516
+Meadow_BELillis_surfaces.txt	0.914103667058	0.03995041164
+Oberauner.txt	0.946570942559	0.0372182375713
+Song_2012_family_study_study_797.txt	0.869988293023	0.154208395612

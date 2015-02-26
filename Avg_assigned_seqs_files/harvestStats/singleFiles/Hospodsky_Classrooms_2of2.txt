@@ -1,0 +1,15 @@
+2014-08-14 15:21:30
+
+------------
+
+3 samples in ../split_library_log/Hospodsky_Classrooms_2of2_split_library_log.txt
+15 samples in ../otu_table_stats/Hospodsky_Classrooms_otu_table_stats.txt
+
+------------
+sample	splitLibLog	otuTableStats	percent
+Indoorair5	1084.0	937.0	0.864391143911
+HVACduct4	381.0	314.0	0.824146981627
+Indoorair4	120.0	106.0	0.883333333333
+------------
+Mean =  0.857290486291 percent of seqs made it into OTU table
+SD =  0.0246788784328

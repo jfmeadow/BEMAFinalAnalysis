@@ -1,0 +1,28 @@
+---
+title: "BEMA_Rachel"
+output: html_document
+---
+
+
+```{r}
+
+dm <- read.table("unweighted_unifrac_dm.txt")
+map <- read.table("mergedMap_no_source_no_kit_forR.txt")
+map.new <- map[rownames(dm),]
+identical(rownames(dm), rownames(map.new))
+library(vegan)
+adonis(dm ~ map.new$phinchID)
+adonis(dm ~ map.new$Geolocation)
+adonis(dm ~ map.new$Building_Type)
+adonis(dm ~ map.new$Building_Type2)
+adonis(dm ~ map.new$Room_Function)
+adonis(dm ~ map.new$Sequencing_Technology)
+adonis(dm ~ map.new$Primer_name)
+adonis(dm ~ map.new$Sampling_Method)
+adonis(dm ~ map.new$Matrix)
+adonis(dm ~ map.new$Specific_Matrix)
+adonis(dm ~ map.new$Specific_Matrix2)
+adonis(dm ~ map.new$Extraction_method)
+
+```
+

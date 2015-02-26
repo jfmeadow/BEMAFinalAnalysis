@@ -1,0 +1,13 @@
+2014-08-14 15:21:30
+
+------------
+
+1 samples in ../split_library_log/Gauzere_core_1of3_split_library_log.txt
+3 samples in ../otu_table_stats/Gauzere_core_otu_table_stats.txt
+
+------------
+sample	splitLibLog	otuTableStats	percent
+Hospital	11121.0	10465.0	0.941012498876
+------------
+Mean =  0.941012498876 percent of seqs made it into OTU table
+SD =  0.0

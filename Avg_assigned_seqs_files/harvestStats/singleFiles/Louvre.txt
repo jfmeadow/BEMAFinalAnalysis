@@ -1,0 +1,15 @@
+2014-08-14 15:21:32
+
+------------
+
+3 samples in ../split_library_log/Louvre_split_library_log.txt
+3 samples in ../otu_table_stats/Louvre_otu_table_stats.txt
+
+------------
+sample	splitLibLog	otuTableStats	percent
+LS3	9457.0	8334.0	0.881251982658
+LS4	9119.0	7973.0	0.874328325474
+LJ1	8391.0	7275.0	0.867000357526
+------------
+Mean =  0.87419355522 percent of seqs made it into OTU table
+SD =  0.00581898198399

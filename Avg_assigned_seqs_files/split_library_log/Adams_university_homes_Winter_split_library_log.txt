@@ -1,0 +1,53 @@
+Number raw input seqs	25744
+
+Length outside bounds of 200 and 1000	73
+Num ambiguous bases exceeds limit of 6	65
+Missing Qual Score	0
+Mean qual score below minimum of 25	2870
+Max homopolymer run exceeds limit of 6	59
+Num mismatches in primer exceeds limit of 0: 2929
+
+Sequence length details for all sequences passing quality filters:
+Raw len min/max/avg	200.0/504.0/331.7
+Wrote len min/max/avg	175.0/479.0/306.7
+
+Barcodes corrected/not	125/1236
+Uncorrected barcodes will not be written to the output fasta file.
+Corrected barcodes will be written with the appropriate barcode category.
+Corrected but unassigned sequences will not be written unless --retain_unassigned_reads is enabled.
+
+Total valid barcodes that are not in mapping file	0
+Sequences associated with valid barcodes that are not in the mapping file will not be written.
+
+Barcodes in mapping file
+Num Samples	26
+Sample ct min/max/mean: 294 / 1944 / 712.00
+Sample	Sequence Count	Barcode
+Winter.4.Balcony	1944	CGTCTAGTAC
+Winter.10.Balcony	1700	TACACGTGAT
+Winter.5.Balcony	1684	TACGAGTATG
+Winter.2.Balcony	1551	ATCAGACACG
+Winter.8.Balcony	1255	ATAGAGTACT
+Winter.7.Kitchen	1124	TACTCTCGTG
+Winter.7.LR	942	TAGAGACGAG
+Winter.2.LR	600	ACGCTCGACA
+Winter.2.Bedroom	598	AGCACTGTAG
+Winter.8.Bedroom	547	AGTACGCTAT
+Winter.4.Bedroom	509	TCACGTACTA
+Winter.2.Kitchen	480	ACGAGTGCGT
+Winter.5.Kitchen	466	TCTACGTAGC
+Winter.2.Bath	459	AGACGCACTC
+Winter.5.LR	447	TGTACTACTC
+Winter.3.Kitchen	437	ATATCGCGAG
+Winter.5.Bedroom	431	CGTAGACTAG
+Winter.3.Bedroom	406	TCTCTATGCG
+Winter.4.Bath	406	ATACGACGTA
+Winter.5.Bath	402	ACGACTACAG
+Winter.10.Bedroom	389	TACACACACT
+Winter.3.Bath	375	CTCGCGTGTC
+Winter.3.LR	366	CGTGTCTCTA
+Winter.4.Kitchen	358	CATAGTAGTG
+Winter.11.Bath	342	TAGTGTAGAT
+Winter.8.Bath	294	AGCGTCGTCT
+
+Total number seqs written	18512

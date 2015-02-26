@@ -1,0 +1,38 @@
+2014-08-14 15:21:28
+
+------------
+
+26 samples in ../split_library_log/Adams_university_homes_Winter_split_library_log.txt
+59 samples in ../otu_table_stats/Adams_university_homes_otu_table_stats.txt
+
+------------
+sample	splitLibLog	otuTableStats	percent
+Winter.4.Balcony	1944.0	1683.0	0.865740740741
+Winter.10.Balcony	1700.0	1459.0	0.858235294118
+Winter.5.Balcony	1684.0	1298.0	0.770783847981
+Winter.2.Balcony	1551.0	1350.0	0.870406189555
+Winter.8.Balcony	1255.0	1063.0	0.847011952191
+Winter.7.Kitchen	1124.0	697.0	0.620106761566
+Winter.7.LR	942.0	505.0	0.536093418259
+Winter.2.LR	600.0	531.0	0.885
+Winter.2.Bedroom	598.0	485.0	0.811036789298
+Winter.8.Bedroom	547.0	439.0	0.802559414991
+Winter.4.Bedroom	509.0	425.0	0.834970530452
+Winter.2.Kitchen	480.0	387.0	0.80625
+Winter.5.Kitchen	466.0	273.0	0.585836909871
+Winter.2.Bath	459.0	331.0	0.721132897603
+Winter.5.LR	447.0	236.0	0.527964205817
+Winter.3.Kitchen	437.0	285.0	0.652173913043
+Winter.5.Bedroom	431.0	301.0	0.69837587007
+Winter.3.Bedroom	406.0	240.0	0.591133004926
+Winter.4.Bath	406.0	210.0	0.51724137931
+Winter.5.Bath	402.0	237.0	0.589552238806
+Winter.10.Bedroom	389.0	272.0	0.699228791774
+Winter.3.Bath	375.0	230.0	0.613333333333
+Winter.3.LR	366.0	216.0	0.590163934426
+Winter.4.Kitchen	358.0	208.0	0.581005586592
+Winter.11.Bath	342.0	216.0	0.631578947368
+Winter.8.Bath	294.0	141.0	0.479591836735
+------------
+Mean =  0.691788761109 percent of seqs made it into OTU table
+SD =  0.126499861094

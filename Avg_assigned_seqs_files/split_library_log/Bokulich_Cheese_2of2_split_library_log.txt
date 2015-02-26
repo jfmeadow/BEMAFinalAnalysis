@@ -1,0 +1,27 @@
+Input file paths
+Mapping filepath: map.txt (md5: 734b9c8b422175c3e4c475624590d983)
+Sequence read filepath: sequences.fastq (md5: 8574cec0056f3d7bc9f170fc30ce8290)
+Barcode read filepath: barcodes.fastq (md5: d2805aa23a63d925658f163f38ee4704)
+
+Quality filter results
+Total number of input sequences: 2374791
+Barcode not in mapping file: 2033363
+Read too short after quality truncation: 2530
+Count of N characters exceeds limit: 2535
+Illumina quality digit = 0: 0
+Barcode errors exceed max: 0
+
+Result summary (after quality filtering)
+Median sequence length: 252.00
+Cheese.B2.1135601	65341
+Cheese.A2.1135589	61787
+Cheese.A1.1135569	55544
+Cheese.A3.1135609	48786
+Cheese.B3.1135586	37069
+Cheese.A4.1135570	27095
+Cheese.B4.1135633	25639
+Cheese.B1.1135637	15102
+
+Total number seqs written	336363
+---
+

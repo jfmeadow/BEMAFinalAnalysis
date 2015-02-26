@@ -1,0 +1,50 @@
+Num samples: 29
+Num observations: 716
+Total count: 7120
+Table density (fraction of non-zero values): 0.081
+Table md5 (unzipped): af3f098723b821adef3e72b1a5cce572
+
+Counts/sample summary:
+ Min: 70.0
+ Max: 606.0
+ Median: 223.000
+ Mean: 245.517
+ Std. dev.: 132.477
+ Sample Metadata Categories: None provided
+ Observation Metadata Categories: taxonomy
+
+Counts/sample detail:
+ 8BF.397085: 70.0
+ 1EU.397083: 101.0
+ 6BF.397080: 111.0
+ 17EU.397092: 119.0
+ 4BF.397072: 129.0
+ 3EU.397090: 136.0
+ 6EU.397081: 144.0
+ 12EU.397069: 156.0
+ 10EU.397087: 158.0
+ 19EU.397079: 166.0
+ 2BF.397074: 170.0
+ 7BF.397095: 175.0
+ 13BF.397089: 177.0
+ 9BF.397097: 190.0
+ 18EU.397078: 223.0
+ 13EU.397086: 228.0
+ 11EU.397091: 232.0
+ 20EU.397084: 232.0
+ 3BF.397093: 238.0
+ 8EU.397075: 255.0
+ 2EU.397076: 290.0
+ 11BF.397088: 343.0
+ 10BF.397096: 352.0
+ 21EU.397077: 352.0
+ 15BF.397094: 362.0
+ 17BF.397082: 375.0
+ 5EU.397070: 461.0
+ 12BF.397073: 569.0
+ 16BF.397071: 606.0
+
+-----------------------------
+
+this many sequences were in the original "seq.fna" file:
+7596
