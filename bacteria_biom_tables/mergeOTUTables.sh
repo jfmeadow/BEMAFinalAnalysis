@@ -1,0 +1,14 @@
+#!/bin/sh
+
+source /macqiime/configs/bash_profile.txt
+
+# merge_otu_tables.py -i otu_table_adams.biom,otu_table_cheese.biom,otu_table_louvre.biom -o merged.biom
+
+
+merge_otu_tables.py -i otu_table_Adams_university_homes.biom,otu_table_Bokulich_NAB_V4_5_Dairy_Swabs_1884.biom,otu_table_Bokulich_NAB_V4_5_NICU_SWABS_1798.biom,otu_table_Bowers_storm_peak_air_314.biom,otu_table_Claesson_elderly_gut_486.biom,otu_table_Costello_whole_body_sites_449.biom,otu_table_Defilippo_children_and_diets_496.biom,otu_table_Fierer_undergraduate_palms_317.biom,otu_table_Flores_Residential_Kitchen_Microbiology_1566.biom,otu_table_Flores_restroom_surface_biogeography_1335.biom,otu_table_Gauzere_core.biom,otu_table_Jeon_korea_house_2025.biom,otu_table_Kelley_Newborn_ICU_386.biom,otu_table_Kelley_office_contamination_1479.biom,otu_table_Kembel_BELillis_dust_2027.biom,otu_table_Lauber_88_soils_103.biom,otu_table_Leff_forty_homes_HiSeq_1772.biom,otu_table_Louvre_air.biom,otu_table_Meadow_BELillis_2026.biom,otu_table_Meadow_BELillis_surfaces_2030.biom,otu_table_Oberauner_amplicondata.biom,otu_table_Song_2012_family_797.biom,otu_table_Hospodsky_Classrooms.biom -o merged.biom
+
+
+
+biom summarize-table -i merged.biom -o merged_stats.txt
+
+

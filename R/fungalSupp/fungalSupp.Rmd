@@ -1,0 +1,138 @@
+---
+output:
+  pdf_document:
+    highlight: tango
+    toc: yes
+  html_document:
+    keep_md: yes
+---
+
+```{r config, echo=FALSE}
+library(knitr)
+opts_chunk$set(background='gray80', tidy=FALSE, cache=FALSE, keep_md=TRUE, 
+               fig.path='figure/', fig.height=7, fig.width=7)
+```
+
+
+# BEMA supplemental fungal figures
+
+Make figures for brief fungal analysis. The goal is to show that the study bias, combined with too few studies makes combined analysis goofy. 
+
+
+```{r loadPackages}
+library(wesanderson)
+library(scales)
+```
+
+
+
+
+```{r inputData}
+# setwd('~/Dropbox/BEMA/bacteriaHTS/closed_ref_pickedOTUs/R/fungalSupp')
+pcAll <- read.delim('binary_sorensen_dice_pc.txt', head=TRUE, row.names=1)
+pcNoAA <- read.delim('binary_sorensen_dice_pcNoAmend.txt', head=TRUE, row.names=1)
+map <- read.delim('map.txt', head=TRUE, row.names=1)[-1, ]
+```
+
+```{r checkMap}
+head(map)  # Description
+map$Description <- factor(map$Description)
+table(map$Description)
+```
+
+
+
+
+```{r makeColors}
+cols <- c(wes.palette(5, 'Darjeeling2')[-3], wes.palette(5, 'Darjeeling')[c(1,4)])
+cols <- cols[c(6,3,4,2,5,1)]
+map$col <- ''
+
+for(i in 1:nlevels(map$Description)) {
+  these <- which(map$Description == levels(map$Description)[i])
+  map$col[these] <- cols[i]
+  }
+```
+
+
+
+
+```{r pullStats}
+perExplAll <- pcAll['% variation explained', ]
+perExplNoAA <- pcNoAA['% variation explained', ]
+perExplAll[c(1,2)]; perExplNoAA[c(1,2)]
+sum(perExplAll)
+dim(pcAll)
+pcAll <- pcAll[-c(nrow(pcAll), nrow(pcAll)-1), c(1,2)]
+pcNoAA <- pcNoAA[-c(nrow(pcNoAA), nrow(pcNoAA)-1), c(1,2)]
+```
+
+
+
+```{r checkRows}
+all(row.names(pcAll) %in% row.names(map))
+all(row.names(pcNoAA) %in% row.names(map))
+```
+
+
+```{r setMaps}
+mapAll <- map[row.names(pcAll), ]
+mapNoAA <- map[row.names(pcNoAA), ]
+```
+
+
+
+```{r setupLegend}
+leg <- data.frame(levs = levels(mapAll$Description), cols=cols)
+
+leg$legend <- 'Adams Home Dust'
+leg$legend[leg$levs == 'Adams_res_surfaces'] <- 'Adams Home Surfaces'
+leg$legend[leg$levs == 'Adams_univ_classroom'] <- 'Adams University Classrooms'
+leg$legend[leg$levs == 'Amend_global'] <- 'Amend Global'
+leg$legend[leg$levs == 'Dann_Chamacos'] <- 'Dannemiller Chamacos'
+leg$legend[leg$levs == 'Hoisington_retail'] <- 'Hoisington Retail'
+
+
+
+
+
+legNoAA <- leg[-c(1, 4), ]
+ch <- function(x) {as.character(x)}
+
+```
+
+
+
+```{r plotPCA}
+#pdf('pcAllFungal.pdf', useDingbats=FALSE)
+plot(pcAll, pch=21, col='gray20', bg=alpha(mapAll$col, alpha=1), cex=2, 
+     bty='l', ann=FALSE, xaxt='n', yaxt='n')
+legend('topright', legend=leg$legend, 
+       pch=21, pt.bg=ch(leg$cols), col='gray30', pt.cex=2, cex=1, 
+       bg='gray96', box.col='gray90')
+mtext('PC1 (9.6%)', side=1, adj=1, line=.1)
+mtext('PC2 (4.5%)', side=2, adj=1, line=.2)
+#dev.off()
+```
+
+
+```{r plotPCA2}
+#pdf('pcNoAAFungal.pdf', useDingbats=FALSE)
+plot(pcNoAA, pch=21, col='gray20', bg=alpha(mapNoAA$col, alpha=1), cex=2, 
+     bty='l', ann=FALSE, xaxt='n', yaxt='n')
+legend('topright', legend=legNoAA$legend, 
+       pch=21, pt.bg=ch(legNoAA$cols), col='gray30', pt.cex=2, cex=1, 
+       bg='gray96', box.col='gray90')
+mtext('PC1 (8.5%)', side=1, adj=1, line=.1)
+mtext('PC2 (4.2%)', side=2, adj=1, line=.2)
+#dev.off()
+```
+
+
+
+
+
+
+
+
+
