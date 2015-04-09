@@ -1,0 +1,5 @@
+	Study ID	Geolocation	Building Type	Sampling Matrix
+Geolocation	0.2038089	-	-	-
+Building Type	0.4878384	0.1487009	-	-
+Sampling Matrix	0.1107539	0.02592291	-0.0442383	-
+Sampling Matrix (general)	-0.1443483	0.08475003	-0.2703807	0.5799955
